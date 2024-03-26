@@ -7,6 +7,6 @@ process.stdin.flush()
 
 output = process.stdout.readline()
 
-print(output)
+print(output, end="")
 
 process.stdin.close()

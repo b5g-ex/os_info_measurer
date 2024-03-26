@@ -1,10 +1,13 @@
 all: build
 
-build:
+build: src/test_caller.cpp
 	g++ src/main.cpp
+	g++ src/test_caller.cpp -o src/test_caller
 
-run:
-	./a.out
+test: src/test_caller
+	./src/test_caller
+	python3 ./src/test_caller.py
 
 clean:
 	rm -rf ./a.out
+	rm -rf ./src/test_caller
