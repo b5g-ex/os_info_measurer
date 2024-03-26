@@ -1,10 +1,23 @@
 #include <iostream>
+#include <atomic>
 #include <thread>
 #include <chrono>
+
+std::atomic<bool> done(false);
+
+void worker()
+{
+    while (!done)
+    {
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::cout << "working" << std::endl;
+    }
+}
 
 int main(int argc, char *argv[])
 {
     std::string command;
+    std::thread t;
 
     while (true)
     {
@@ -24,7 +37,19 @@ int main(int argc, char *argv[])
             break;
         }
 
-        std::cout << command << std::endl;
+        if (command == std::string("start"))
+        {
+            std::cerr << "start" << std::endl;
+            done = false;
+            t = std::thread(worker);
+        }
+
+        if (command == std::string("stop"))
+        {
+            std::cerr << "stop" << std::endl;
+            done = true;
+            t.join();
+        }
     }
     return 0;
 }
