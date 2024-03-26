@@ -8,8 +8,7 @@ defmodule OsInfoMeasurer.Application do
   @impl true
   def start(_type, _args) do
     children = [
-      # Starts a worker by calling: OsInfoMeasurer.Worker.start_link(arg)
-      # {OsInfoMeasurer.Worker, arg}
+      {OsInfoMeasurer.PortServer, []}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
