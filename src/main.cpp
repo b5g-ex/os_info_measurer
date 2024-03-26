@@ -51,5 +51,12 @@ int main(int argc, char *argv[])
             t.join();
         }
     }
+
+    if (!done)
+    {
+        done = true;
+        t.join();
+    }
+
     return 0;
 }
