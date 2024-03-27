@@ -1,18 +1,8 @@
 #include <iostream>
-#include <atomic>
 #include <thread>
 #include <chrono>
 
-std::atomic<bool> done(false);
-
-void worker()
-{
-    while (!done)
-    {
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        std::cout << "working" << std::endl;
-    }
-}
+#include "worker.hpp"
 
 int main(int argc, char *argv[])
 {
