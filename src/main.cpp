@@ -1,13 +1,17 @@
 #include <iostream>
 #include <thread>
 #include <chrono>
+#include <vector>
 
+#include "proc_stat.hpp"
 #include "worker.hpp"
 
 int main(int argc, char *argv[])
 {
     std::string command;
     std::thread t;
+    std::vector<std::unique_ptr<Measurer<std::string>>> measurers;
+    measurers.emplace_back(std::make_unique<ProcStat>());
 
     while (true)
     {
@@ -32,6 +36,10 @@ int main(int argc, char *argv[])
             std::cerr << "start" << std::endl;
             done = false;
             t = std::thread(worker);
+            for (const auto &measurer : measurers)
+            {
+                measurer->start();
+            }
         }
 
         if (command == std::string("stop"))
@@ -39,6 +47,10 @@ int main(int argc, char *argv[])
             std::cerr << "stop" << std::endl;
             done = true;
             t.join();
+            for (const auto &measurer : measurers)
+            {
+                measurer->stop("tmp");
+            }
         }
     }
 

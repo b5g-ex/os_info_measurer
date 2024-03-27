@@ -1,7 +1,7 @@
 all: build
 
 build: src/test_caller.cpp
-	g++ src/worker.cpp src/main.cpp -lpthread
+	g++ -std=c++17 src/worker.cpp src/main.cpp -lpthread
 	g++ src/test_caller.cpp -o src/test_caller
 
 test: build
