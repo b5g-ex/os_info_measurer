@@ -1,21 +1,15 @@
 # OsInfoMeasurer
 
-**TODO: Add description**
+`/proc/stat` 一行目と `free` コマンドの結果を計測（ログ）するプログラムです。
 
-## Installation
+- Elixir からは `Port` 経由で使用します。
+- Python からは `subprocess.Popen` 経由で使用します。
+- C++ からは `popen` 経由で使用します。
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `os_info_measurer` to your list of dependencies in `mix.exs`:
+## `/proc/stat` からの CPU 使用率計算
 
-```elixir
-def deps do
-  [
-    {:os_info_measurer, "~> 0.1.0"}
-  ]
-end
-```
+- https://stackoverflow.com/questions/23367857/accurate-calculation-of-cpu-usage-given-in-percentage-in-linux#answer-23376195
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at <https://hexdocs.pm/os_info_measurer>.
+### iowait について
 
+- https://twitter.com/search?q=from%3A%40n_soda%20iowait&src=recent_search_click&f=live
