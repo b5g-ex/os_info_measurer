@@ -20,27 +20,36 @@ template <typename T> class Measurer {
   };
 
 public:
+  Measurer(std::filesystem::path data_directory_path) : data_directory_path_(data_directory_path) {}
   virtual ~Measurer() {}
 
   void start() {
     thread_ = std::thread([this]() {
-      while (!done) {
+      while (!done_) {
         measure();
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
       }
     });
   }
-  void stop(std::filesystem::path data_directory_path) {
-    done = true;
-    thread_.join();
-    dump_to_csv(data_directory_path);
+  void stop() {
+    if (!done_) {
+      done_ = true;
+      thread_.join();
+      dump_to_csv();
+    }
   }
-  virtual void measure() = 0;
-  virtual void dump_to_csv(std::filesystem::path data_directory_path) = 0;
 
-  std::atomic<bool> done = false;
+  std::filesystem::path csv_file_path(std::string csv_file_name) {
+    return data_directory_path_ / csv_file_name;
+  }
+
+  virtual void measure() = 0;
+  virtual void dump_to_csv() = 0;
+
   std::vector<measurement> measurements;
 
 private:
+  std::filesystem::path data_directory_path_;
+  std::atomic<bool> done_ = false;
   std::thread thread_;
 };

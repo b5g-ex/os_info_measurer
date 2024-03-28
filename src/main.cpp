@@ -10,7 +10,7 @@ int main(int argc, char *argv[]) {
   std::string command;
   std::thread t;
   std::vector<std::unique_ptr<Measurer<std::string>>> measurers;
-  measurers.emplace_back(std::make_unique<ProcStat>());
+  measurers.emplace_back(std::make_unique<ProcStat>("tmp"));
 
   while (true) {
     std::cin >> command;
@@ -41,7 +41,7 @@ int main(int argc, char *argv[]) {
       done = true;
       t.join();
       for (const auto &measurer : measurers) {
-        measurer->stop("tmp");
+        measurer->stop();
       }
     }
   }
