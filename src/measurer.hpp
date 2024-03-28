@@ -9,8 +9,7 @@
 template <typename T> class Measurer {
   class measurement {
   public:
-    measurement(T data)
-        : time_(std::chrono::system_clock::now()), data_(data) {}
+    measurement(T data) : time_(std::chrono::system_clock::now()), data_(data) {}
 
     std::chrono::system_clock::time_point time() const { return time_; }
     T data() const { return data_; }
