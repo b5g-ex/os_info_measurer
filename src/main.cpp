@@ -3,6 +3,7 @@
 #include <thread>
 #include <vector>
 
+#include "free.hpp"
 #include "proc_stat.hpp"
 
 int main(int argc, char *argv[]) {
@@ -25,6 +26,7 @@ int main(int argc, char *argv[]) {
   std::string command;
   std::vector<std::unique_ptr<Measurer<std::string>>> measurers;
   measurers.emplace_back(std::make_unique<ProcStat>(dir_path, (uint)interval_ms));
+  measurers.emplace_back(std::make_unique<Free>(dir_path, (uint)interval_ms));
 
   while (true) {
     std::cin >> command;
