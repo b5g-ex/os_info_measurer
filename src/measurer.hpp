@@ -60,7 +60,7 @@ public:
 
 private:
   std::filesystem::path data_directory_path_;
-  bool done_ = false;
+  bool done_ = true;
   std::thread thread_;
   uint interval_ms_;
 };
