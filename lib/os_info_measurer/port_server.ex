@@ -15,10 +15,18 @@ defmodule OsInfoMeasurer.PortServer do
     GenServer.call(__MODULE__, :stop_measure)
   end
 
+  def close() do
+    GenServer.call(__MODULE__, :close)
+  end
+
   def init(_args) do
     Process.flag(:trap_exit, true)
-    port = Port.open({:spawn, "./a.out -d tmp -i 1000"}, [:binary])
+    port = Port.open({:spawn, "./a.out -d tmp -i 1000"}, [:binary, :exit_status])
     {:ok, %{port: port}}
+  end
+
+  def handle_info({:EXIT, _port, :normal}, state) do
+    {:noreply, state}
   end
 
   def handle_info({_port, {:data, data}}, state) do
@@ -34,5 +42,10 @@ defmodule OsInfoMeasurer.PortServer do
   def handle_call(:stop_measure, _from, state) do
     Port.command(state.port, "stop\n")
     {:reply, :ok, state}
+  end
+
+  def handle_call(:close, _from, state) do
+    Port.close(state.port)
+    {:reply, :ok, %{state | port: nil}}
   end
 end
