@@ -21,7 +21,7 @@ public:
     std::ofstream csv_file_stream(csv_file_path.string());
 
     // header, see man 5 proc, /proc/stat
-    csv_file_stream << "measurement_time[ms]"s
+    csv_file_stream << "time[ms]"s
                     << ","s
                     << "user,nice,system,idle,iowait,irq,softirq,steal,guest,guest_nice"s
                     << ","s
