@@ -16,6 +16,7 @@ defmodule OsInfoMeasurer.PortServer do
   end
 
   def init(_args) do
+    Process.flag(:trap_exit, true)
     port = Port.open({:spawn, "./a.out -d tmp -i 1000"}, [:binary])
     {:ok, %{port: port}}
   end
