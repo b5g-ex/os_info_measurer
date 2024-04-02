@@ -1,6 +1,5 @@
 #pragma once
 
-#include <atomic>
 #include <chrono>
 #include <filesystem>
 #include <thread>
@@ -20,14 +19,25 @@ template <typename T> class Measurer {
   };
 
 public:
-  Measurer(std::filesystem::path data_directory_path) : data_directory_path_(data_directory_path) {}
+  Measurer(std::filesystem::path data_directory_path, uint interval_ms)
+      : data_directory_path_(data_directory_path), interval_ms_(interval_ms) {
+    if (!std::filesystem::exists(data_directory_path_)) {
+      std::cerr << data_directory_path_ << " does not exists." << std::endl;
+      exit(1);
+    }
+    if (!std::filesystem::is_directory(data_directory_path_)) {
+      std::cout << data_directory_path_ << " is not directory." << std::endl;
+      exit(1);
+    }
+  }
   virtual ~Measurer() {}
 
   void start() {
+    done_ = false;
     thread_ = std::thread([this]() {
       while (!done_) {
         measure();
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::this_thread::sleep_for(std::chrono::milliseconds(interval_ms_));
       }
     });
   }
@@ -50,6 +60,7 @@ public:
 
 private:
   std::filesystem::path data_directory_path_;
-  std::atomic<bool> done_ = false;
+  bool done_ = false;
   std::thread thread_;
+  uint interval_ms_;
 };

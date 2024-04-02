@@ -7,7 +7,8 @@ using namespace std::literals;
 
 class ProcStat : public Measurer<std::string> {
 public:
-  ProcStat(std::filesystem::path data_directory_path) : Measurer(data_directory_path) {}
+  ProcStat(std::filesystem::path data_directory_path, uint interval_ms)
+      : Measurer(data_directory_path, interval_ms) {}
   ~ProcStat() { Measurer::stop(); }
   void measure() override {
     auto line = get_cpu_line();
