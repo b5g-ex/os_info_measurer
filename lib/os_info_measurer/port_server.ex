@@ -7,11 +7,11 @@ defmodule OsInfoMeasurer.PortServer do
     GenServer.start_link(__MODULE__, args, name: __MODULE__)
   end
 
-  def start_measure() do
+  def start_measuring() do
     GenServer.call(__MODULE__, :start_measure)
   end
 
-  def stop_measure() do
+  def stop_measuring() do
     GenServer.call(__MODULE__, :stop_measure)
   end
 
