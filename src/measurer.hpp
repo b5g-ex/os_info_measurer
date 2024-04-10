@@ -24,12 +24,7 @@ public:
       : data_directory_path_(data_directory_path), file_name_prefix_(file_name_prefix),
         interval_ms_(interval_ms) {
     if (!std::filesystem::exists(data_directory_path_)) {
-      std::cerr << data_directory_path_ << " does not exists." << std::endl;
-      exit(1);
-    }
-    if (!std::filesystem::is_directory(data_directory_path_)) {
-      std::cout << data_directory_path_ << " is not directory." << std::endl;
-      exit(1);
+      std::filesystem::create_directory(data_directory_path_);
     }
   }
   virtual ~Measurer() {}
