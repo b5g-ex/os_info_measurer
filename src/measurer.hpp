@@ -19,8 +19,10 @@ template <typename T> class Measurer {
   };
 
 public:
-  Measurer(std::filesystem::path data_directory_path, uint interval_ms)
-      : data_directory_path_(data_directory_path), interval_ms_(interval_ms) {
+  Measurer(std::filesystem::path data_directory_path, std::string file_name_prefix,
+           uint interval_ms)
+      : data_directory_path_(data_directory_path), file_name_prefix_(file_name_prefix),
+        interval_ms_(interval_ms) {
     if (!std::filesystem::exists(data_directory_path_)) {
       std::cerr << data_directory_path_ << " does not exists." << std::endl;
       exit(1);
@@ -50,7 +52,7 @@ public:
   }
 
   std::filesystem::path csv_file_path(std::string csv_file_name) {
-    return data_directory_path_ / csv_file_name;
+    return data_directory_path_ / (file_name_prefix_ + csv_file_name);
   }
 
   virtual void measure() = 0;
@@ -62,5 +64,6 @@ private:
   std::filesystem::path data_directory_path_;
   bool done_ = true;
   std::thread thread_;
+  std::string file_name_prefix_;
   uint interval_ms_;
 };

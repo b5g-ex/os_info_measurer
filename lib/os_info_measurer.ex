@@ -3,16 +3,13 @@ defmodule OsInfoMeasurer do
   Documentation for `OsInfoMeasurer`.
   """
 
-  @doc """
-  Hello world.
+  def start(data_directory_path, file_name_prefix, interval_ms) do
+    OsInfoMeasurer.PortServer.open(data_directory_path, file_name_prefix, interval_ms)
+    OsInfoMeasurer.PortServer.start_measure()
+  end
 
-  ## Examples
-
-      iex> OsInfoMeasurer.hello()
-      :world
-
-  """
-  def hello do
-    :world
+  def stop() do
+    OsInfoMeasurer.PortServer.stop_measure()
+    OsInfoMeasurer.PortServer.close()
   end
 end

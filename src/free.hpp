@@ -7,8 +7,8 @@ using namespace std::literals;
 
 class Free : public Measurer<std::string> {
 public:
-  Free(std::filesystem::path data_directory_path, uint interval_ms)
-      : Measurer(data_directory_path, interval_ms) {}
+  Free(std::filesystem::path data_directory_path, std::string file_name_prefix, uint interval_ms)
+      : Measurer(data_directory_path, file_name_prefix, interval_ms) {}
   ~Free() { Measurer::stop(); }
   void measure() override {
     auto line = get_memory_line();

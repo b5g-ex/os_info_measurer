@@ -8,6 +8,7 @@
 
 int main(int argc, char *argv[]) {
   std::filesystem::path dir_path = "tmp";
+  std::string file_name_prefix = "";
   int interval_ms = 100;
 
   for (int i = 1; i < argc; ++i) {
@@ -15,6 +16,11 @@ int main(int argc, char *argv[]) {
     if (k == "-d") {
       std::string v = argv[i + 1];
       dir_path = v;
+    }
+
+    if (k == "-f") {
+      std::string v = argv[i + 1];
+      file_name_prefix = v;
     }
 
     if (k == "-i") {
@@ -25,8 +31,8 @@ int main(int argc, char *argv[]) {
 
   std::string command;
   std::vector<std::unique_ptr<Measurer<std::string>>> measurers;
-  measurers.emplace_back(std::make_unique<ProcStat>(dir_path, (uint)interval_ms));
-  measurers.emplace_back(std::make_unique<Free>(dir_path, (uint)interval_ms));
+  measurers.emplace_back(std::make_unique<ProcStat>(dir_path, file_name_prefix, (uint)interval_ms));
+  measurers.emplace_back(std::make_unique<Free>(dir_path, file_name_prefix, (uint)interval_ms));
 
   while (true) {
     std::cin >> command;
