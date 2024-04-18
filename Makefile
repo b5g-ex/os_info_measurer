@@ -1,3 +1,7 @@
+# for not calling from mix compile
+# if calling from mix compile, MIX_APP_PATH is defined
+MIX_APP_PATH ?= _build/dev/lib/os_info_measurer
+
 $(info $(MIX_APP_PATH))
 
 PRIV_DIR = $(MIX_APP_PATH)/priv

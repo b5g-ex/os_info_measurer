@@ -1,12 +1,15 @@
 from subprocess import Popen, PIPE
 
-process = Popen(["./a.out"], stdin=PIPE, stdout=PIPE, text=True)
+line = "./_build/dev/lib/os_info_measurer/priv/measurer -d data -f python_ -i 100"
+
+process = Popen(
+    line.split(),
+    stdin=PIPE,
+    stdout=PIPE,
+    text=True,
+)
 
 process.stdin.write("start\n")
 process.stdin.flush()
-
-output = process.stdout.readline()
-
-print(output, end="")
 
 process.stdin.close()
