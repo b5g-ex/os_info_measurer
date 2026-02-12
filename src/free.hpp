@@ -1,6 +1,7 @@
 #include "measurer.hpp"
 
 #include <algorithm>
+#include <array>
 #include <fstream>
 
 using namespace std::literals;
@@ -65,7 +66,7 @@ private:
     std::array<char, 256> buffer;
     std::string result;
     // custom deleter
-    std::unique_ptr<std::FILE, decltype(&pclose)> pipe(popen(command.c_str(), "r"), pclose);
+    auto pipe = std::unique_ptr<FILE, int (*)(FILE *)>(popen(command.c_str(), "r"), pclose);
     if (!pipe) {
       throw std::runtime_error("popen() failed!");
     }
