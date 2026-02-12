@@ -2,7 +2,8 @@ defmodule OsInfoMeasurerTest do
   use ExUnit.Case
   doctest OsInfoMeasurer
 
-  test "greets the world" do
-    assert OsInfoMeasurer.hello() == :world
+  test "module has start and stop functions" do
+    assert function_exported?(OsInfoMeasurer, :start, 3)
+    assert function_exported?(OsInfoMeasurer, :stop, 0)
   end
 end
