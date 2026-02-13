@@ -4,7 +4,10 @@ defmodule OsInfoMeasurer.PortServer do
   require Logger
 
   def open(data_directory_path, file_name_prefix, interval_ms) do
-    GenServer.call(__MODULE__, {:open, data_directory_path, file_name_prefix, interval_ms})
+    with :ok <- validate_directory(data_directory_path),
+         :ok <- validate_interval(interval_ms) do
+      GenServer.call(__MODULE__, {:open, data_directory_path, file_name_prefix, interval_ms})
+    end
   end
 
   def close() do
@@ -22,6 +25,22 @@ defmodule OsInfoMeasurer.PortServer do
   def start_link(args) do
     GenServer.start_link(__MODULE__, args, name: __MODULE__)
   end
+
+  defp validate_directory(path) do
+    cond do
+      not File.exists?(path) ->
+        {:error, :directory_not_found}
+
+      not File.dir?(path) ->
+        {:error, :not_a_directory}
+
+      true ->
+        :ok
+    end
+  end
+
+  defp validate_interval(interval_ms) when interval_ms > 0, do: :ok
+  defp validate_interval(_), do: {:error, :invalid_interval}
 
   def init(_args) do
     Process.flag(:trap_exit, true)
