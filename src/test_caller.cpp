@@ -6,10 +6,27 @@
  */
 
 #include <cstdio>
+#include <filesystem>
 #include <iostream>
 #include <sstream>
 #include <string>
 #include <unistd.h>
+#include <vector>
+
+// Find measurer binary in common locations
+std::string find_measurer() {
+  std::vector<std::string> candidates = {"_build/dev/lib/os_info_measurer/priv/measurer",
+                                         "_build/test/lib/os_info_measurer/priv/measurer",
+                                         "./priv/measurer"};
+
+  for (const auto &path : candidates) {
+    if (std::filesystem::exists(path)) {
+      return path;
+    }
+  }
+
+  return "";
+}
 
 int main(int argc, char *argv[]) {
   // Default values
@@ -29,9 +46,16 @@ int main(int argc, char *argv[]) {
     }
   }
 
+  // Find measurer binary
+  std::string measurer_path = find_measurer();
+  if (measurer_path.empty()) {
+    std::cerr << "Error: measurer binary not found" << std::endl;
+    return 1;
+  }
+
   // Build the measurer command
   std::stringstream ss;
-  ss << "./priv/measurer -d " << directory << " -f " << prefix << " -i " << interval;
+  ss << measurer_path << " -d " << directory << " -f " << prefix << " -i " << interval;
   std::string cmd = ss.str();
 
   // Start measurer binary
