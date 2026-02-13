@@ -83,8 +83,8 @@ defmodule OsInfoMeasurerTest do
       if length(csv_files) > 0 do
         # ファイル名にプレフィックスが含まれていることを確認
         assert Enum.any?(csv_files, fn file ->
-          Path.basename(file) =~ "csv_test"
-        end)
+                 Path.basename(file) =~ "csv_test"
+               end)
 
         # CSVファイルが空でないことを確認
         Enum.each(csv_files, fn file ->
@@ -103,11 +103,14 @@ defmodule OsInfoMeasurerTest do
         {_output, 0} ->
           # Run test_caller.py with custom directory and prefix
           prefix = "py_test"
-        {output, exit_code} =
-          System.cmd("python3", ["src/test_caller.py", "-d", tmp_dir, "-f", prefix, "-i", "100"],
-            cd: File.cwd!(),
-            stderr_to_stdout: true
-          )
+
+          {output, exit_code} =
+            System.cmd(
+              "python3",
+              ["src/test_caller.py", "-d", tmp_dir, "-f", prefix, "-i", "100"],
+              cd: File.cwd!(),
+              stderr_to_stdout: true
+            )
 
           # Check that the script ran without error
           assert exit_code == 0, "test_caller.py failed: #{output}"
@@ -124,7 +127,9 @@ defmodule OsInfoMeasurerTest do
           proc_stat_content = File.read!(proc_stat_file)
 
           assert byte_size(free_content) > 100, "#{prefix}free.csv is too small or empty"
-          assert byte_size(proc_stat_content) > 100, "#{prefix}proc_stat.csv is too small or empty"
+
+          assert byte_size(proc_stat_content) > 100,
+                 "#{prefix}proc_stat.csv is too small or empty"
 
         {_output, _exit_code} ->
           :skip
@@ -141,6 +146,7 @@ defmodule OsInfoMeasurerTest do
       if File.exists?(test_caller_path) do
         # Run test_caller with custom directory and prefix
         prefix = "cpp_test"
+
         {output, exit_code} =
           System.cmd(test_caller_path, ["-d", tmp_dir, "-f", prefix, "-i", "100"],
             stderr_to_stdout: true
