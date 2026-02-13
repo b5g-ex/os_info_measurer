@@ -10,7 +10,7 @@ A_OUT = $(PRIV_DIR)/measurer
 all: $(PRIV_DIR) build
 
 build: Makefile src/test_caller.cpp
-	g++ -std=c++17 src/main.cpp -lpthread -o $(A_OUT)
+	g++ -std=c++20 src/main.cpp -lpthread -o $(A_OUT)
 	g++ src/test_caller.cpp -o src/test_caller
 
 test: build
