@@ -8,22 +8,22 @@
 
 ## Phase 1: 安定性向上（優先度：高）
 
-- [ ] **1. PortServerにエラーハンドリング追加**
+- [x] **1. PortServerにエラーハンドリング追加**
   - 2重起動防止
   - Port未初期化状態でのコマンド送信防止
   - バイナリファイル存在チェック強化
 
-- [ ] **2. start/stopの戻り値を`:ok | {:error, reason}`に変更**
+- [x] **2. start/stopの戻り値を`:ok | {:error, reason}`に変更**
   - エラー理由: `:already_started`, `:not_started`, `:binary_not_found`
 
-- [ ] **3. 状態管理機能追加**
+- [x] **3. 状態管理機能追加**
   - `OsInfoMeasurer.status/0` → `:idle | :measuring | {:error, reason}`
   - `OsInfoMeasurer.measuring?/0` → `true | false`
 
-- [ ] **4. 壊れたテストを削除**
+- [x] **4. 壊れたテストを削除**
   - `test/os_info_measurer_test.exs`の`hello()`テストを削除
 
-- [ ] **5. 実際の計測テストを追加**
+- [x] **5. 実際の計測テストを追加**
   - CSV生成テスト
   - 2重起動防止テスト
   - 異常系テスト
@@ -80,8 +80,9 @@ config :os_info_measurer,
 3. Phase 3 (8→9→10) - APIを改善
 4. Phase 4 (11→12) - 拡張機能
 
-## 進捗: 0/12
+## 進捗: 5/12
 開始日: 2026年2月12日
+Phase 1完了日: 2026年2月13日
 
 ## 注意事項
 - 既存のAPI（`start/3`）は維持し併存させる
