@@ -27,9 +27,8 @@ defmodule OsInfoMeasurer do
   @spec start(Path.t(), String.t(), pos_integer()) ::
           :ok | {:error, PortServer.error_reason()}
   def start(data_directory_path, file_name_prefix, interval_ms) do
-    with :ok <- PortServer.open(data_directory_path, file_name_prefix, interval_ms),
-         :ok <- PortServer.start_measuring() do
-      :ok
+    with :ok <- PortServer.open(data_directory_path, file_name_prefix, interval_ms) do
+      PortServer.start_measuring()
     end
   end
 
@@ -46,9 +45,8 @@ defmodule OsInfoMeasurer do
   """
   @spec stop() :: :ok | {:error, PortServer.error_reason()}
   def stop() do
-    with :ok <- PortServer.stop_measuring(),
-         :ok <- PortServer.close() do
-      :ok
+    with :ok <- PortServer.stop_measuring() do
+      PortServer.close()
     end
   end
 

@@ -80,7 +80,7 @@ defmodule OsInfoMeasurerTest do
       csv_files = Path.wildcard(Path.join(tmp_dir, "*.csv"))
 
       # ファイルが生成されていなければスキップ（C++バイナリの動作に依存）
-      if length(csv_files) > 0 do
+      if not Enum.empty?(csv_files) do
         # ファイル名にプレフィックスが含まれていることを確認
         assert Enum.any?(csv_files, fn file ->
                  Path.basename(file) =~ "csv_test"
