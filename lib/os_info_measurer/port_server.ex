@@ -3,6 +3,8 @@ defmodule OsInfoMeasurer.PortServer do
 
   require Logger
 
+  @measurer_binary_path "priv/measurer"
+
   def open(data_directory_path, file_name_prefix, interval_ms) do
     with :ok <- validate_directory(data_directory_path),
          :ok <- validate_interval(interval_ms) do
@@ -45,7 +47,8 @@ defmodule OsInfoMeasurer.PortServer do
   def init(_args) do
     Process.flag(:trap_exit, true)
 
-    bin_path = Application.app_dir(:os_info_measurer) |> Path.join("priv/measurer")
+    app_dir_path = Application.app_dir(:os_info_measurer)
+    bin_path = Path.join(app_dir_path, @measurer_binary_path)
 
     if File.exists?(bin_path) do
       {:ok, %{port: nil, bin_path: bin_path, measuring: false}}

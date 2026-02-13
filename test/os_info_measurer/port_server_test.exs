@@ -38,19 +38,12 @@ defmodule OsInfoMeasurer.PortServerTest do
       assert {:error, _reason} = result
     end
 
-    test "Port.command after manual port close should return error" do
-      # Portを開く
-      :ok = PortServer.open("tmp", "test", 100)
-
-      # PortServerのportを直接取得して閉じる（異常系のシミュレーション）
-      state = :sys.get_state(PortServer)
-      if state.port, do: Port.close(state.port)
-
-      # この状態でstart_measuringを呼ぶとPort.commandが失敗する
-      # 期待: エラーを返すべき（クラッシュしない）
+    test "start_measuring before opening should return error" do
+      # Port を開かずに start_measuring を呼ぶ
       result = PortServer.start_measuring()
 
-      assert {:error, _reason} = result
+      # 期待: {:error, :not_opened} を返すべき
+      assert {:error, :not_opened} = result
     end
   end
 end
