@@ -107,6 +107,31 @@ defmodule OsInfoMeasurer.PortServer do
     GenServer.call(__MODULE__, :stop_measure)
   end
 
+  @doc """
+  現在の状態を取得します。
+
+  ## 戻り値
+  - `:idle` - Port接続が開かれていない
+  - `:opened` - Port接続は開かれているが計測していない
+  - `:measuring` - 計測中
+  """
+  @spec status() :: :idle | :opened | :measuring
+  def status() do
+    GenServer.call(__MODULE__, :status)
+  end
+
+  @doc """
+  現在計測中かどうかを返します。
+
+  ## 戻り値
+  - `true` - 計測中
+  - `false` - 計測していない
+  """
+  @spec measuring?() :: boolean()
+  def measuring?() do
+    GenServer.call(__MODULE__, :measuring?)
+  end
+
   @doc false
   @spec start_link(term()) :: GenServer.on_start()
   def start_link(args) do
@@ -231,5 +256,20 @@ defmodule OsInfoMeasurer.PortServer do
         true = Port.command(state.port, "stop\n")
         {:reply, :ok, %{state | measuring: false}}
     end
+  end
+
+  def handle_call(:status, _from, state) do
+    status =
+      cond do
+        is_nil(state.port) -> :idle
+        state.measuring -> :measuring
+        true -> :opened
+      end
+
+    {:reply, status, state}
+  end
+
+  def handle_call(:measuring?, _from, state) do
+    {:reply, state.measuring, state}
   end
 end

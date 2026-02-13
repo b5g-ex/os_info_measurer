@@ -10,11 +10,7 @@ defmodule OsInfoMeasurer.PortServerTest do
     # 各テスト後にクリーンアップ
     on_exit(fn ->
       if Process.whereis(PortServer) do
-        try do
-          PortServer.close()
-        catch
-          _, _ -> :ok
-        end
+        PortServer.close()
       end
     end)
 
