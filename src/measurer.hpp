@@ -1,14 +1,16 @@
 #pragma once
 
+#include <atomic>
 #include <chrono>
+#include <cstdint>
 #include <filesystem>
 #include <thread>
 #include <vector>
 
 template <typename T> class Measurer {
-  class measurement {
+  class Measurement {
   public:
-    measurement(T data) : time_(std::chrono::system_clock::now()), data_(data) {}
+    Measurement(T data) : time_(std::chrono::system_clock::now()), data_(data) {}
 
     std::chrono::system_clock::time_point time() const { return time_; }
     T data() const { return data_; }
@@ -20,14 +22,15 @@ template <typename T> class Measurer {
 
 public:
   Measurer(std::filesystem::path data_directory_path, std::string file_name_prefix,
-           uint interval_ms)
+           uint32_t interval_ms)
       : data_directory_path_(data_directory_path), file_name_prefix_(file_name_prefix),
         interval_ms_(interval_ms) {
     if (!std::filesystem::exists(data_directory_path_)) {
       std::filesystem::create_directories(data_directory_path_);
     }
   }
-  virtual ~Measurer() {}
+
+  virtual ~Measurer() { stop(); }
 
   void start() {
     done_ = false;
@@ -38,10 +41,13 @@ public:
       }
     });
   }
+
   void stop() {
     if (!done_) {
       done_ = true;
-      thread_.join();
+      if (thread_.joinable()) {
+        thread_.join();
+      }
       dump_to_csv();
     }
   }
@@ -53,12 +59,12 @@ public:
   virtual void measure() = 0;
   virtual void dump_to_csv() = 0;
 
-  std::vector<measurement> measurements;
+  std::vector<Measurement> measurements;
 
 private:
   std::filesystem::path data_directory_path_;
-  bool done_ = true;
+  std::atomic<bool> done_ = true;
   std::thread thread_;
   std::string file_name_prefix_;
-  uint interval_ms_;
+  uint32_t interval_ms_;
 };
