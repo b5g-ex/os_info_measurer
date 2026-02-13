@@ -13,7 +13,7 @@ Linux OS の情報（CPU使用率、メモリ使用量）を定期的に計測�
 ### 前提条件
 - Linux環境
 - Elixir 1.14以上
-- C++17対応のコンパイラ（g++など）
+- C++20対応のコンパイラ（g++ 11以上など）
 
 ### セットアップ
 
@@ -90,15 +90,28 @@ end
 
 **proc_stat.csv**
 ```
-timestamp,user,nice,system,idle,iowait,irq,softirq
-2026-02-13T15:25:30Z,1000,50,500,50000,100,10,5
+time[ms],user,nice,system,idle,iowait,irq,softirq,steal,guest,guest_nice
+1707840330000,1000,50,500,50000,100,10,5,0,0,0
 ```
 
 **free.csv**
 ```
-timestamp,total,used,free,shared,buffers,cached
-2026-02-13T15:25:30Z,8000000,4000000,2000000,500000,1000000,2000000
+time[ms],total[KiB],used[KiB],free[KiB],shared[KiB],buff/cache[KiB],available[KiB]
+1707840330000,8000000,4000000,2000000,500000,1000000,2000000
 ```
+
+#### フォーマット詳細
+
+- **time[ms]**: UNIXタイムスタンプ（ミリ秒）。`std::chrono::system_clock::now().time_since_epoch()` から計算
+- **proc_stat**: `/proc/stat` の CPU 行から取得（`man 5 proc` 参照）
+- **free**: `free` コマンド出力から取得。標準 Linux の `free` と BusyBox（Nerves で使用） の両方に対応
+
+#### Nerves での利用
+
+Nerves 環境でも利用可能です。以下は BusyBox の `free` 出力フォーマットにも対応しています：
+
+- `/proc/stat` 読み込み - Nerves ルートファイルシステムで利用可能
+- `free` コマンド実行 - BusyBox 版 `free` をサポート
 
 ## トラブルシューティング
 
@@ -148,7 +161,3 @@ OsInfoMeasurer.start("tmp", "test", 1000)
 ### iowait について
 
 - [Twitter: iowait に関する考察](https://twitter.com/search?q=from%3A%40n_soda%20iowait&src=recent_search_click&f=live)
-
-## ライセンス
-
-（必要に応じて追加）
