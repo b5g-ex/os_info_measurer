@@ -10,22 +10,23 @@ int main(int argc, char *argv[]) {
   std::filesystem::path dir_path = "tmp";
   std::string file_name_prefix = "";
   int interval_ms = 100;
+  bool debug = false;
 
   for (int i = 1; i < argc; ++i) {
     std::string k = argv[i];
-    if (k == "-d") {
-      std::string v = argv[i + 1];
-      dir_path = v;
-    }
-
-    if (k == "-f") {
-      std::string v = argv[i + 1];
-      file_name_prefix = v;
-    }
-
-    if (k == "-i") {
-      std::string v = argv[i + 1];
-      interval_ms = std::stoi(v);
+    if (k == "-d" && i + 1 < argc) {
+      dir_path = argv[++i];
+    } else if (k == "-f" && i + 1 < argc) {
+      file_name_prefix = argv[++i];
+    } else if (k == "-i" && i + 1 < argc) {
+      try {
+        interval_ms = std::stoi(argv[++i]);
+      } catch (const std::invalid_argument &e) {
+        std::cerr << "Error: invalid interval value" << std::endl;
+        return -1;
+      }
+    } else if (k == "-v") {
+      debug = true;
     }
   }
 
@@ -40,24 +41,30 @@ int main(int argc, char *argv[]) {
     if (std::cin.eof()) {
       // NOTE: Erlang VM のシャットダウンで標準入力が閉じられると EOF となる
       //       それをトリガーに終了させる
-      std::cerr << "eof" << std::endl;
+      if (debug) {
+        std::cerr << "eof" << std::endl;
+      }
       break;
     }
 
     if (std::cin.fail()) {
-      std::cerr << "fail" << std::endl;
+      if (debug) {
+        std::cerr << "fail" << std::endl;
+      }
       break;
     }
 
-    if (command == std::string("start")) {
-      std::cerr << "start" << std::endl;
+    if (command == "start") {
+      if (debug) {
+        std::cerr << "start" << std::endl;
+      }
       for (const auto &measurer : measurers) {
         measurer->start();
       }
-    }
-
-    if (command == std::string("stop")) {
-      std::cerr << "stop" << std::endl;
+    } else if (command == "stop") {
+      if (debug) {
+        std::cerr << "stop" << std::endl;
+      }
       for (const auto &measurer : measurers) {
         measurer->stop();
       }
