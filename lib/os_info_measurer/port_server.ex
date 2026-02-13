@@ -12,13 +12,19 @@ defmodule OsInfoMeasurer.PortServer do
 
   @measurer_binary_path "priv/measurer"
 
+  @typedoc "PortServerの内部状態"
+  @type state :: %{
+          port: port() | nil,
+          bin_path: String.t(),
+          measuring: boolean()
+        }
+
   @typedoc "開放・計測操作のエラー理由"
   @type error_reason ::
           :directory_not_found
           | :not_a_directory
           | :invalid_interval
           | :already_opened
-          | :already_closed
           | :measuring_in_progress
           | :not_opened
           | :already_measuring
@@ -59,7 +65,7 @@ defmodule OsInfoMeasurer.PortServer do
   - `{:error, reason}` - エラー発生
 
   ## エラー理由
-  - `:already_closed` - すでに閉じている
+  - `:not_opened` - Port接続が開かれていない
   - `:measuring_in_progress` - 計測中のため閉じられない
   """
   @spec close() :: :ok | {:error, error_reason()}
@@ -123,6 +129,7 @@ defmodule OsInfoMeasurer.PortServer do
   defp validate_interval(interval_ms) when interval_ms > 0, do: :ok
   defp validate_interval(_), do: {:error, :invalid_interval}
 
+  @spec init(term()) :: {:ok, state()} | {:stop, {:binary_not_found, String.t()}}
   def init(_args) do
     Process.flag(:trap_exit, true)
 
@@ -132,35 +139,51 @@ defmodule OsInfoMeasurer.PortServer do
     if File.exists?(bin_path) do
       {:ok, %{port: nil, bin_path: bin_path, measuring: false}}
     else
-      {:stop, "#{bin_path} not found"}
+      {:stop, {:binary_not_found, bin_path}}
     end
   end
 
-  def handle_info({:EXIT, _port, :normal}, state) do
-    {:noreply, state}
+  def handle_info({port, {:exit_status, status}}, %{port: port} = state) do
+    if status == 0 do
+      Logger.info("C++ measurer binary exited normally (status: 0)")
+    else
+      Logger.error("C++ measurer binary exited abnormally (status: #{status})")
+    end
+
+    {:noreply, %{state | port: nil, measuring: false}}
   end
 
   def handle_info({_port, {:data, data}}, state) do
-    Logger.info("#{inspect(data)}")
+    Logger.debug("Received data from C++ binary: #{inspect(data)}")
     {:noreply, state}
+  end
+
+  def handle_info({:EXIT, _port, :normal}, state) do
+    Logger.debug("Port process exited normally")
+    {:noreply, state}
+  end
+
+  def handle_info({:EXIT, port, reason}, state) do
+    Logger.error("Port process exited unexpectedly: #{inspect(port)}, reason: #{inspect(reason)}")
+    {:noreply, %{state | port: nil, measuring: false}}
   end
 
   def handle_call({:open, data_directory_path, file_name_prefix, interval_ms}, _from, state) do
     cond do
+      not is_nil(state.port) and state.measuring ->
+        {:reply, {:error, :measuring_in_progress}, state}
+
       not is_nil(state.port) ->
         {:reply, {:error, :already_opened}, state}
-
-      state.measuring ->
-        {:reply, {:error, :measuring_in_progress}, state}
 
       true ->
         port =
           Port.open(
-            {:spawn,
-             "#{state.bin_path} -d #{data_directory_path} -f #{file_name_prefix} -i #{interval_ms}"},
+            {:spawn_executable, state.bin_path},
             [
               :binary,
-              :exit_status
+              :exit_status,
+              args: ["-d", data_directory_path, "-f", file_name_prefix, "-i", "#{interval_ms}"]
             ]
           )
 
@@ -171,13 +194,13 @@ defmodule OsInfoMeasurer.PortServer do
   def handle_call(:close, _from, state) do
     cond do
       is_nil(state.port) ->
-        {:reply, {:error, :already_closed}, state}
+        {:reply, {:error, :not_opened}, state}
 
       state.measuring ->
         {:reply, {:error, :measuring_in_progress}, state}
 
       true ->
-        Port.close(state.port)
+        true = Port.close(state.port)
         {:reply, :ok, %{state | port: nil}}
     end
   end
@@ -191,7 +214,7 @@ defmodule OsInfoMeasurer.PortServer do
         {:reply, {:error, :already_measuring}, state}
 
       true ->
-        Port.command(state.port, "start\n")
+        true = Port.command(state.port, "start\n")
         {:reply, :ok, %{state | measuring: true}}
     end
   end
@@ -205,7 +228,7 @@ defmodule OsInfoMeasurer.PortServer do
         {:reply, {:error, :not_measuring}, state}
 
       true ->
-        Port.command(state.port, "stop\n")
+        true = Port.command(state.port, "stop\n")
         {:reply, :ok, %{state | measuring: false}}
     end
   end
