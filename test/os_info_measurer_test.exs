@@ -97,78 +97,67 @@ defmodule OsInfoMeasurerTest do
 
   describe "external callers - Python" do
     @tag :tmp_dir
+    @tag skip: is_nil(System.find_executable("python3"))
     test "test_caller.py generates CSV files", %{tmp_dir: tmp_dir} do
-      # Skip if Python is not available
-      case System.cmd("python3", ["--version"], stderr_to_stdout: true) do
-        {_output, 0} ->
-          # Run test_caller.py with custom directory and prefix
-          prefix = "py_test"
+      prefix = "py_test"
 
-          {output, exit_code} =
-            System.cmd(
-              "python3",
-              ["src/test_caller.py", "-d", tmp_dir, "-f", prefix, "-i", "100"],
-              cd: File.cwd!(),
-              stderr_to_stdout: true
-            )
+      {output, exit_code} =
+        System.cmd(
+          "python3",
+          ~w"#{Path.join(File.cwd!(), "src/test_caller.py")} -d #{tmp_dir} -f #{prefix} -i 100",
+          stderr_to_stdout: true
+        )
 
-          # Check that the script ran without error
-          assert exit_code == 0, "test_caller.py failed: #{output}"
+      # Check that the script ran without error
+      assert exit_code == 0, "test_caller.py failed: #{output}"
 
-          # Check that CSV files were generated
-          free_file = Path.join(tmp_dir, "#{prefix}free.csv")
-          proc_stat_file = Path.join(tmp_dir, "#{prefix}proc_stat.csv")
+      # Check that CSV files were generated
+      free_file = Path.join(tmp_dir, "#{prefix}free.csv")
+      proc_stat_file = Path.join(tmp_dir, "#{prefix}proc_stat.csv")
 
-          assert File.exists?(free_file), "#{prefix}free.csv not found in #{tmp_dir}"
-          assert File.exists?(proc_stat_file), "#{prefix}proc_stat.csv not found in #{tmp_dir}"
+      assert File.exists?(free_file), "#{prefix}free.csv not found in #{tmp_dir}"
+      assert File.exists?(proc_stat_file), "#{prefix}proc_stat.csv not found in #{tmp_dir}"
 
-          # Verify files have content
-          free_content = File.read!(free_file)
-          proc_stat_content = File.read!(proc_stat_file)
+      # Verify files have content
+      free_content = File.read!(free_file)
+      proc_stat_content = File.read!(proc_stat_file)
 
-          assert byte_size(free_content) > 100, "#{prefix}free.csv is too small or empty"
+      assert byte_size(free_content) > 100, "#{prefix}free.csv is too small or empty"
 
-          assert byte_size(proc_stat_content) > 100,
-                 "#{prefix}proc_stat.csv is too small or empty"
-
-        {_output, _exit_code} ->
-          :skip
-      end
+      assert byte_size(proc_stat_content) > 100,
+             "#{prefix}proc_stat.csv is too small or empty"
     end
   end
 
   describe "external callers - C++" do
     @tag :tmp_dir
+    @tag skip: is_nil(File.exists?(Path.join(File.cwd!(), "src/test_caller")))
     test "test_caller generates CSV files", %{tmp_dir: tmp_dir} do
-      # Get absolute path to test_caller binary
-      test_caller_path = Path.join(File.cwd!(), "src/test_caller")
+      prefix = "cpp_test"
 
-      if File.exists?(test_caller_path) do
-        # Run test_caller with custom directory and prefix
-        prefix = "cpp_test"
+      {output, exit_code} =
+        System.cmd(
+          Path.join(File.cwd!(), "src/test_caller"),
+          ~w"-d #{tmp_dir} -f #{prefix} -i 100",
+          stderr_to_stdout: true
+        )
 
-        {output, exit_code} =
-          System.cmd(test_caller_path, ["-d", tmp_dir, "-f", prefix, "-i", "100"],
-            stderr_to_stdout: true
-          )
+      # Check that the script ran without error
+      assert exit_code == 0, "test_caller failed: #{output}"
 
-        # Check that the script ran without error
-        assert exit_code == 0, "test_caller failed: #{output}"
+      # Check that CSV files were generated
+      free_file = Path.join(tmp_dir, "#{prefix}free.csv")
+      proc_stat_file = Path.join(tmp_dir, "#{prefix}proc_stat.csv")
 
-        # Check that CSV files were generated
-        free_file = Path.join(tmp_dir, "#{prefix}free.csv")
-        proc_stat_file = Path.join(tmp_dir, "#{prefix}proc_stat.csv")
+      assert File.exists?(free_file), "#{prefix}free.csv not found in #{tmp_dir}"
+      assert File.exists?(proc_stat_file), "#{prefix}proc_stat.csv not found in #{tmp_dir}"
 
-        assert File.exists?(free_file), "#{prefix}free.csv not found in #{tmp_dir}"
-        assert File.exists?(proc_stat_file), "#{prefix}proc_stat.csv not found in #{tmp_dir}"
+      # Verify files have content
+      free_content = File.read!(free_file)
+      proc_stat_content = File.read!(proc_stat_file)
 
-        # Verify files have content
-        free_content = File.read!(free_file)
-        proc_stat_content = File.read!(proc_stat_file)
-
-        assert byte_size(free_content) > 100, "#{prefix}free.csv is too small or empty"
-        assert byte_size(proc_stat_content) > 100, "#{prefix}proc_stat.csv is too small or empty"
-      end
+      assert byte_size(free_content) > 100, "#{prefix}free.csv is too small or empty"
+      assert byte_size(proc_stat_content) > 100, "#{prefix}proc_stat.csv is too small or empty"
     end
   end
 end
