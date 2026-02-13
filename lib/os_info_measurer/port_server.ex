@@ -1,10 +1,49 @@
 defmodule OsInfoMeasurer.PortServer do
+  @moduledoc """
+  OS情報計測用のC++バイナリとPort通信を管理するGenServer。
+
+  C++バイナリ（priv/measurer）を起動し、Linux OSの情報（CPU、メモリ）を
+  定期的に計測してCSVファイルへ出力する機能を提供します。
+  """
+
   use GenServer
 
   require Logger
 
   @measurer_binary_path "priv/measurer"
 
+  @typedoc "開放・計測操作のエラー理由"
+  @type error_reason ::
+          :directory_not_found
+          | :not_a_directory
+          | :invalid_interval
+          | :already_opened
+          | :already_closed
+          | :measuring_in_progress
+          | :not_opened
+          | :already_measuring
+          | :not_measuring
+
+  @doc """
+  C++バイナリとのPort接続を開きます。
+
+  ## パラメータ
+  - `data_directory_path` - CSV出力先ディレクトリパス（存在する必要あり）
+  - `file_name_prefix` - CSVファイル名のプレフィックス
+  - `interval_ms` - 計測間隔（ミリ秒、正の整数）
+
+  ## 戻り値
+  - `:ok` - 正常に開いた
+  - `{:error, reason}` - エラー発生
+
+  ## エラー理由
+  - `:directory_not_found` - 指定ディレクトリが存在しない
+  - `:not_a_directory` - 指定パスがディレクトリではない
+  - `:invalid_interval` - 計測間隔が0以下
+  - `:already_opened` - すでに開いている
+  - `:measuring_in_progress` - 計測中のため開けない
+  """
+  @spec open(Path.t(), String.t(), pos_integer()) :: :ok | {:error, error_reason()}
   def open(data_directory_path, file_name_prefix, interval_ms) do
     with :ok <- validate_directory(data_directory_path),
          :ok <- validate_interval(interval_ms) do
@@ -12,18 +51,58 @@ defmodule OsInfoMeasurer.PortServer do
     end
   end
 
+  @doc """
+  Port接続を閉じます。
+
+  ## 戻り値
+  - `:ok` - 正常に閉じた
+  - `{:error, reason}` - エラー発生
+
+  ## エラー理由
+  - `:already_closed` - すでに閉じている
+  - `:measuring_in_progress` - 計測中のため閉じられない
+  """
+  @spec close() :: :ok | {:error, error_reason()}
   def close() do
     GenServer.call(__MODULE__, :close)
   end
 
+  @doc """
+  OS情報の計測を開始します。
+
+  Port接続を開いた後に実行する必要があります。
+
+  ## 戻り値
+  - `:ok` - 正常に開始した
+  - `{:error, reason}` - エラー発生
+
+  ## エラー理由
+  - `:not_opened` - Port接続が開かれていない
+  - `:already_measuring` - すでに計測中
+  """
+  @spec start_measuring() :: :ok | {:error, error_reason()}
   def start_measuring() do
     GenServer.call(__MODULE__, :start_measure)
   end
 
+  @doc """
+  OS情報の計測を停止します。
+
+  ## 戻り値
+  - `:ok` - 正常に停止した
+  - `{:error, reason}` - エラー発生
+
+  ## エラー理由
+  - `:not_opened` - Port接続が開かれていない
+  - `:not_measuring` - 計測していない
+  """
+  @spec stop_measuring() :: :ok | {:error, error_reason()}
   def stop_measuring() do
     GenServer.call(__MODULE__, :stop_measure)
   end
 
+  @doc false
+  @spec start_link(term()) :: GenServer.on_start()
   def start_link(args) do
     GenServer.start_link(__MODULE__, args, name: __MODULE__)
   end
