@@ -112,20 +112,20 @@ defmodule OsInfoMeasurerTest do
       assert exit_code == 0, "test_caller.py failed: #{output}"
 
       # Check that CSV files were generated
-      free_file = Path.join(tmp_dir, "#{prefix}free.csv")
-      proc_stat_file = Path.join(tmp_dir, "#{prefix}proc_stat.csv")
+      free_file = Path.join(tmp_dir, "#{prefix}_free.csv")
+      proc_stat_file = Path.join(tmp_dir, "#{prefix}_proc_stat.csv")
 
-      assert File.exists?(free_file), "#{prefix}free.csv not found in #{tmp_dir}"
-      assert File.exists?(proc_stat_file), "#{prefix}proc_stat.csv not found in #{tmp_dir}"
+      assert File.exists?(free_file), "#{prefix}_free.csv not found in #{tmp_dir}"
+      assert File.exists?(proc_stat_file), "#{prefix}_proc_stat.csv not found in #{tmp_dir}"
 
       # Verify files have content
       free_content = File.read!(free_file)
       proc_stat_content = File.read!(proc_stat_file)
 
-      assert byte_size(free_content) > 100, "#{prefix}free.csv is too small or empty"
+      assert byte_size(free_content) > 100, "#{prefix}_free.csv is too small or empty"
 
       assert byte_size(proc_stat_content) > 100,
-             "#{prefix}proc_stat.csv is too small or empty"
+             "#{prefix}_proc_stat.csv is too small or empty"
     end
   end
 
@@ -146,18 +146,18 @@ defmodule OsInfoMeasurerTest do
       assert exit_code == 0, "test_caller failed: #{output}"
 
       # Check that CSV files were generated
-      free_file = Path.join(tmp_dir, "#{prefix}free.csv")
-      proc_stat_file = Path.join(tmp_dir, "#{prefix}proc_stat.csv")
+      free_file = Path.join(tmp_dir, "#{prefix}_free.csv")
+      proc_stat_file = Path.join(tmp_dir, "#{prefix}_proc_stat.csv")
 
-      assert File.exists?(free_file), "#{prefix}free.csv not found in #{tmp_dir}"
-      assert File.exists?(proc_stat_file), "#{prefix}proc_stat.csv not found in #{tmp_dir}"
+      assert File.exists?(free_file), "#{prefix}_free.csv not found in #{tmp_dir}"
+      assert File.exists?(proc_stat_file), "#{prefix}_proc_stat.csv not found in #{tmp_dir}"
 
       # Verify files have content
       free_content = File.read!(free_file)
       proc_stat_content = File.read!(proc_stat_file)
 
-      assert byte_size(free_content) > 100, "#{prefix}free.csv is too small or empty"
-      assert byte_size(proc_stat_content) > 100, "#{prefix}proc_stat.csv is too small or empty"
+      assert byte_size(free_content) > 100, "#{prefix}_free.csv is too small or empty"
+      assert byte_size(proc_stat_content) > 100, "#{prefix}_proc_stat.csv is too small or empty"
     end
   end
 end

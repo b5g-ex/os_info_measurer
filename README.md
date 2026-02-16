@@ -82,9 +82,11 @@ end
 ### ファイル名規則
 
 ```
-{prefix}_free.csv     # メモリ情報
+{prefix}_free.csv       # メモリ情報
 {prefix}_proc_stat.csv  # CPU情報
 ```
+
+※ `prefix` を指定した場合は自動で `_` が入ります（`prefix` は `_` なしでOK）。
 
 ### CSVフォーマット（例）
 

@@ -53,7 +53,10 @@ public:
   }
 
   std::filesystem::path csv_file_path(std::string csv_file_name) {
-    return data_directory_path_ / (file_name_prefix_ + csv_file_name);
+    if (file_name_prefix_.empty()) {
+      return data_directory_path_ / csv_file_name;
+    }
+    return data_directory_path_ / (file_name_prefix_ + "_" + csv_file_name);
   }
 
   virtual void measure() = 0;
